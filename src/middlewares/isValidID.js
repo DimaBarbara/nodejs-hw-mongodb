@@ -4,7 +4,12 @@ import { isValidObjectId } from 'mongoose';
 export const isValidID = (req, res, next) => {
   const { id } = req.params;
   if (!isValidObjectId(id)) {
-    throw createHttpError(400, 'Bad Request');
+    return next(
+      createHttpError(
+        400,
+        `Invalid ID format: "${id}" is not a valid MongoDB ObjectId`,
+      ),
+    );
   }
   next();
 };
