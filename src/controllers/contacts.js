@@ -12,7 +12,13 @@ import { parseSortParams } from '../utils/parseSortParams.js';
 export const getContactController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
-  const data = await getContacts({ page, perPage, sortBy, sortOrder });
+  const data = await getContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    userId: req.user._id,
+  });
   res.json({
     status: 200,
     message: 'Successfully found contacts!',
@@ -22,8 +28,7 @@ export const getContactController = async (req, res) => {
 
 export const getContactsByIdController = async (req, res) => {
   const { id } = req.params;
-
-  const data = await getContactsById(id);
+  const data = await getContactsById(id, req.user._id);
   if (!data) {
     throw createHttpError(404, 'Contact not found');
   }
@@ -35,7 +40,8 @@ export const getContactsByIdController = async (req, res) => {
 };
 
 export const postContactsController = async (req, res) => {
-  const contacts = await postContact(req.body);
+  const contacts = await postContact(req.body, req.user._id);
+
   res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
@@ -45,10 +51,8 @@ export const postContactsController = async (req, res) => {
 
 export const patchContactsController = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await patchContact(id, req.body);
-
+  const contact = await patchContact(id, req.user._id);
   if (!contact) {
-    console.log(contact);
     next(createHttpError(404, 'Contact not found'));
     return;
   }
@@ -61,7 +65,7 @@ export const patchContactsController = async (req, res, next) => {
 
 export const deleteContactController = async (req, res, next) => {
   const { id } = req.params;
-  const contacts = await deleteContact(id, req.body);
+  const contacts = await deleteContact(id, req.body, req.user._id);
   if (!contacts) {
     next(createHttpError(404, 'Contact not found'));
     return;

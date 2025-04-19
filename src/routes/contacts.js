@@ -13,8 +13,10 @@ import {
   updateStudentSchema,
 } from '../validation/contact.js';
 import { isValidID } from '../middlewares/isValidID.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const contactRouter = Router();
+contactRouter.use(authenticate);
 
 contactRouter.get('/', ctrlWrapper(getContactController));
 
