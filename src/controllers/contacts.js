@@ -8,6 +8,9 @@ import {
 } from '../services/contacts.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
 export const getContactController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -51,8 +54,21 @@ export const postContactsController = async (req, res) => {
 
 export const patchContactsController = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await patchContact(id, req.body, req.user._id);
-  console.log('contact', contact);
+  const photo = req.file;
+  let photoUrl;
+
+  if (photo) {
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+  const contact = await patchContact(
+    id,
+    { payload: req.body, photo: photoUrl },
+    req.user._id,
+  );
 
   if (!contact) {
     next(createHttpError(404, 'Contact not found'));
@@ -72,8 +88,5 @@ export const deleteContactController = async (req, res, next) => {
     next(createHttpError(404, 'Contact not found'));
     return;
   }
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully delete a contact!',
-  });
+  res.status(204);
 };

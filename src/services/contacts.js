@@ -49,7 +49,6 @@ export const patchContact = async (id, payload, userId, options = {}) => {
       ...options,
     },
   );
-  console.log(result);
 
   if (!result || !result.value) return null;
   return {
