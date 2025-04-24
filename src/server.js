@@ -7,6 +7,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import userRouter from './routes/auth.js';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/index.js';
 
 export const setupServer = () => {
   const app = express();
@@ -24,6 +25,7 @@ export const setupServer = () => {
 
   app.use('/contacts', contactRouter);
   app.use('/auth', userRouter);
+  app.use('/uploads', express.static(UPLOAD_DIR));
   app.get(notFoundHandler);
 
   app.use(errorHandler);
